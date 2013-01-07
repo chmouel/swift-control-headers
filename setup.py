@@ -22,7 +22,7 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2.6',
         'Environment :: No Input/Output (Daemon)'],
-    install_requires=[],  # removed for better compat
+    install_requires=['swift'],  # removed for better compat
     entry_points={
         'paste.filter_factory': ['control_headers=%s' % entry_point]
     }
