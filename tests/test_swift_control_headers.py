@@ -33,8 +33,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             'header_h2': '*=-',
             'header_h3': 'admin:admin=rw',
             'header_h4': 'admin:admin=rw,acc:foo=-,*=-',
-            'header_h5': 'acc:usr=r,*=-',
-            }
+            'header_h5': 'acc:usr=r,*=-'}
         self.test_default = middleware.filter_factory(self.conf)(FakeApp())
 
     def test_allowed_to_write_default(self):
@@ -42,8 +41,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             environ={'REQUEST_METHOD': 'POST',
                      'REMOTE_USER': ('acc', 'foo'),
                      },
-            headers={'X-Container-Meta-Unkown':  'newvalue'},
-            )
+            headers={'X-Container-Meta-Unkown':  'newvalue'})
 
         resp = req.get_response(self.test_default)
         self.assertTrue('swift.authorize' not in resp.environ)
@@ -53,8 +51,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             environ={'REQUEST_METHOD': 'POST',
                      'REMOTE_USER': ('acc', 'usr'),
                      },
-            headers={'X-Container-Meta-h3':  'newvalue'},
-            )
+            headers={'X-Container-Meta-h3':  'newvalue'})
 
         resp = req.get_response(self.test_default)
         self.assertTrue('swift.authorize' not in resp.environ)
@@ -64,8 +61,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             environ={'REQUEST_METHOD': 'POST',
                      'REMOTE_USER': ('admin', 'admin'),
                      },
-            headers={'X-Container-Meta-h4':  'newvalue'},
-            )
+            headers={'X-Container-Meta-h4':  'newvalue'})
         resp = req.get_response(self.test_default)
         self.assertTrue('swift.authorize' not in resp.environ)
 
@@ -73,8 +69,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             environ={'REQUEST_METHOD': 'POST',
                      'REMOTE_USER': ('id', 'foo'),
                      },
-            headers={'X-Container-Meta-h4':  'newvalue'},
-            )
+            headers={'X-Container-Meta-h4':  'newvalue'})
         resp = req.get_response(self.test_default)
         self.assertTrue('swift.authorize' in resp.environ)
 
@@ -83,8 +78,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             environ={'REQUEST_METHOD': 'POST',
                      'REMOTE_USER': ('id', 'admin'),
                      },
-            headers={'X-Container-Meta-h2':  'newvalue'},
-            )
+            headers={'X-Container-Meta-h2':  'newvalue'})
         resp = req.get_response(self.test_default)
         self.assertTrue('swift.authorize' in resp.environ)
 
@@ -93,8 +87,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             environ={'REQUEST_METHOD': 'POST',
                      'REMOTE_USER': ('acc', 'usr'),
                      },
-            headers={'X-Container-Meta-h1':  'newvalue'},
-            )
+            headers={'X-Container-Meta-h1':  'newvalue'})
         resp = req.get_response(self.test_default)
         self.assertTrue('swift.authorize' in resp.environ)
 
@@ -103,8 +96,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             environ={'REQUEST_METHOD': 'GET',
                      'REMOTE_USER': ('acc', 'usr'),
                      },
-            headers={'X-Container-Meta-foo':  'newvalue'},
-            )
+            headers={'X-Container-Meta-foo':  'newvalue'})
         resp = req.get_response(self.test_default)
         self.assertTrue('HTTP_X_CONTAINER_META_FOO' in resp.environ)
 
@@ -113,8 +105,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             environ={'REQUEST_METHOD': 'GET',
                      'REMOTE_USER': ('acc', 'usr'),
                      },
-            headers={'X-Container-Meta-foo':  'newvalue'},
-            )
+            headers={'X-Container-Meta-foo':  'newvalue'})
         test_middleware = middleware.ControlHeaderMiddleware(FakeApp,
                                                              self.conf)
         newheaders = test_middleware.process_read_request(req,
@@ -126,8 +117,7 @@ class TestSwiftControlHeaders(unittest.TestCase):
             environ={'REQUEST_METHOD': 'GET',
                      'REMOTE_USER': ('acc', 'usr'),
                      },
-            headers={'X-Container-Meta-h2':  'newvalue'},
-            )
+            headers={'X-Container-Meta-h2':  'newvalue'})
         test_middleware = middleware.ControlHeaderMiddleware(FakeApp,
                                                              self.conf)
         newheaders = test_middleware.process_read_request(req,

@@ -21,12 +21,9 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2.6',
-        'Environment :: No Input/Output (Daemon)',
-        ],
+        'Environment :: No Input/Output (Daemon)'],
     install_requires=[],  # removed for better compat
     entry_points={
-        'paste.filter_factory': [
-            'control_headers=%s' % entry_point,
-            ],
-        },
-    )
+        'paste.filter_factory': ['control_headers=%s' % entry_point]
+    }
+)

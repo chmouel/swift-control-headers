@@ -39,7 +39,7 @@ class ControlHeaderMiddleware(object):
                 continue
 
             if (user in self.config[_header] and
-                self.config[_header][user] == "rw"):
+                    self.config[_header][user] == "rw"):
                 continue
 
             if (user in self.config[_header] and
