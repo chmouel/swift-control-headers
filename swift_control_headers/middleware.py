@@ -82,7 +82,6 @@ class ControlHeaderMiddleware(object):
 
     def __call__(self, env, start_response):
         req = Request(env)
-        body = []
 
         if req.method in ("POST", "PUT"):
             try:
@@ -94,16 +93,8 @@ class ControlHeaderMiddleware(object):
         def replace_start_response(status, headers, exc_info=None):
             newheaders = self.process_read_request(req, headers)
             start_response(status, newheaders, exc_info)
-            return body.append
 
-        app_iter = self.app(env, replace_start_response)
-        try:
-            body.extend(app_iter)
-        finally:
-            if hasattr(app_iter, 'close'):
-                app_iter.close()
-        body = ''.join(body)
-        return [body]
+        return self.app(env, replace_start_response)
 
 
 def filter_factory(global_conf, **local_conf):
