@@ -27,19 +27,21 @@ class ControlHeaderMiddleware(object):
                     user = tuple(user.split(':'))
                 self.config[v][user] = perm
 
-    def process_write_request(self, req):
+    def get_user(self, req):
         keystone_identity = req.environ.get('keystone.identity', {})
+        if keystone_identity:
+            return (keystone_identity['tenant'][1], keystone_identity['user'])
+        else:
+            return req.remote_user
+
+    def process_write_request(self, req):
+        user = self.get_user(req)
+
         for header in req.headers:
             if not '-Meta-' in header:
                 continue
             _header = header[header.find("-Meta-") + 6:]
             _header = _header.replace('-', '_').lower()
-
-            if keystone_identity:
-                user = (keystone_identity['tenant'][1],
-                        keystone_identity['user'])
-            else:
-                user = req.remote_user
 
             if not _header in self.config:
                 continue
@@ -53,11 +55,12 @@ class ControlHeaderMiddleware(object):
                 ('*' in self.config[_header] and
                  self.config[_header]['*'] in ("-", "r")):
                 self.logger.debug(
-                    "[control_headers] Forbidding writing %s header for %s" %
+                    "[control_headers] Forbidding writting %s header for %s" %
                     (_header, user))
                 raise DenyHeaderWriteNotPermitted
 
     def process_read_request(self, req, headers):
+        user = self.get_user(req)
         newheaders = []
         for header in headers:
             h = header[0].lower()
@@ -67,14 +70,29 @@ class ControlHeaderMiddleware(object):
             _header = h[h.find("-meta-") + 6:]
             _header = _header.replace('-', '_')
             if _header in self.config:
-                user = req.remote_user
+                # We are allowing headers by default
+                allowed = True
+
                 if (user in self.config[_header] and
-                    self.config[_header][user] == "-") or \
-                    ('*' in self.config[_header] and
-                     self.config[_header]['*'] == "-"):
+                        self.config[_header][user] == "-"):
+                    allowed = False
+                if (user in self.config[_header] and
+                        self.config[_header][user] == "w"):
+                    allowed = False
+                if ('*' in self.config[_header] and
+                        self.config[_header]['*'] == "-"):
+                    allowed = False
+
+                # Just handle when there is a '*' and a explicit r/rw
+                # for a user, make sure it's allowed to read.
+                if (user in self.config[_header] and
+                        self.config[_header][user] in ('rw', 'r')):
+                    allowed = True
+
+                if not allowed:
                     self.logger.debug(
-                        "[control_headers] Skip showing %s header" %
-                        (_header))
+                        "[control_headers] Skip showing %s header for %s" %
+                        (_header, user))
                     continue
                 # Default to show this may change (and due duplication).
                 newheaders.append(header)
