@@ -47,8 +47,8 @@ class ControlHeaderMiddleware(object):
                 ('*' in self.config[_header] and
                  self.config[_header]['*'] in ("-", "r")):
                 self.logger.debug(
-                    "[control_headers] Forbidding writing %s header" %
-                    (_header))
+                    "[control_headers] Forbidding writing %s header for %s" %
+                    (_header, user))
                 raise DenyHeaderWriteNotPermitted
 
     def process_read_request(self, req, headers):
