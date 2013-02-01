@@ -28,12 +28,18 @@ class ControlHeaderMiddleware(object):
                 self.config[v][user] = perm
 
     def process_write_request(self, req):
+        keystone_identity = req.environ.get('keystone.identity', {})
         for header in req.headers:
             if not '-Meta-' in header:
                 continue
             _header = header[header.find("-Meta-") + 6:]
             _header = _header.replace('-', '_').lower()
-            user = req.remote_user
+
+            if keystone_identity:
+                user = (keystone_identity['tenant'][1],
+                        keystone_identity['user'])
+            else:
+                user = req.remote_user
 
             if not _header in self.config:
                 continue

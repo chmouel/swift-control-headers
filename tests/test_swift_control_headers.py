@@ -33,7 +33,8 @@ class TestSwiftControlHeaders(unittest.TestCase):
             'header_h2': '*=-',
             'header_h3': 'admin:admin=rw',
             'header_h4': 'admin:admin=rw,acc:foo=-,*=-',
-            'header_h5': 'acc:usr=r,*=-'}
+            'header_h5': 'acc:usr=r,*=-',
+            'header_h6': 'acc:usr=rw,*=-'}
         self.test_default = middleware.filter_factory(self.conf)(FakeApp())
 
     def test_allowed_to_write_default(self):
@@ -53,6 +54,22 @@ class TestSwiftControlHeaders(unittest.TestCase):
                      },
             headers={'X-Container-Meta-h3':  'newvalue'})
 
+        resp = req.get_response(self.test_default)
+        self.assertTrue('swift.authorize' not in resp.environ)
+
+    def test_keystone_identitiy_allowed_to_write(self):
+        headers = {'X-Container-Meta-h6': 'newvalue'}
+
+        req = self._make_request(
+            environ={
+                'REQUEST_METHOD': 'POST',
+                'REMOTE_USER': ('shouldfail', 'weusekeystone'),
+                'keystone.identity': {
+                    'tenant': (1, 'acc'),
+                    'user': 'usr',
+                }
+            },
+            headers=headers)
         resp = req.get_response(self.test_default)
         self.assertTrue('swift.authorize' not in resp.environ)
 
